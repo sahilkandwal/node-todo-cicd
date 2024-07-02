@@ -83,20 +83,3 @@ pipeline {
         }
     }
 }
-pipeline {
-    agent any
-
-    stages {
-        stage('SSH Debug') {
-            steps {
-                sshagent(credentials: ['tech']) {
-                    sh '''
-                        ssh -v user@server "echo Hello from Jenkins!"
-                    '''
-                }
-            }
-        }
-        // Add other stages as needed
-    }
-    // Post-build actions or other pipeline configurations
-}
