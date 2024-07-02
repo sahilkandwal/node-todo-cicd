@@ -83,3 +83,45 @@ pipeline {
         }
     }
 }
+
+
+pipeline {
+    agent any
+
+    environment {
+        GIT_REPO_URL = 'https://github.com/sahilkandwal/node-todo-cicd.git'
+        GIT_BRANCH = 'master'
+        SSH_CREDENTIALS_ID = 'ec2-ssh-key' // The ID of your SSH credentials in Jenkins
+        EC2_IP = 'your-ec2-ip' // Replace with your EC2 instance IP
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${env.GIT_BRANCH}", url: "${env.GIT_REPO_URL}", credentials: 'techh'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'echo "Building project..."'
+                // Add your build commands here, e.g., npm install
+                sh 'npm install'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+                        ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts
+                        scp -o StrictHostKeyChecking=no -r * ubuntu@${EC2_IP}:/home/ubuntu/deploy/
+                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} 'bash -s' < /home/ubuntu/deploy/deploy_script.sh
+                    '''
+                }
+            }
+        }
+    }
+}
+
