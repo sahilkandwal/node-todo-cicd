@@ -4,18 +4,39 @@ pipeline {
     stages {
         stage('Pull Code') {
             steps {
-                checkout scm
+                script {
+                    echo 'Pulling code from Git repository'
+                    checkout scm
+                }
             }
         }
         
         stage('Deploy to develop Server') {
             steps {
                 script {
+                    echo 'Deploying to develop server'
                     sshagent(['my-ssh-credentials']) {
-                        sh 'ssh -o StrictHostKeyChecking=no ubuntu@52.66.238.98 "cd /home/test_project && sh tech.sh"'
+                        sh '''
+                            ssh -o StrictHostKeyChecking=no ubuntu@52.66.238.98 << EOF
+                            cd /home/test_project
+                            sh tech.sh
+                            EOF
+                        '''
                     }
                 }
             }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline execution completed'
+        }
+        success {
+            echo 'Pipeline succeeded'
+        }
+        failure {
+            echo 'Pipeline failed'
         }
     }
 }
