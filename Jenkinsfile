@@ -18,7 +18,7 @@ pipeline {
                     sshagent(['my-ssh-credentials']) {
                         sh '''
                             ssh -o StrictHostKeyChecking=no ubuntu@52.66.238.98 << EOF
-                            cd /home/test_project
+                            cd /home/ubuntu/test_project
                             sh tech.sh
                             EOF
                         '''
